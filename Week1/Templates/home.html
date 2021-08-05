@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Word Prediction Demo</title>
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+</head>
+<body>
+    <h2>Word Prediction Demo</h2>
+    <textarea type="text" cols="50" placeholder="Enter word here..." id="wordSearch"></textarea>
+    <br>
+    <h3>Phrase Typed: <span id="sentence"></span></h3>
+    <button type="button" id="wordBtn">Predict Words</button>
+    <br><br>
+    <table id="wordTable" border="1">
+        <thead>
+            <th>Word No.</th>
+            <th>Possible Word</th>
+            <th>Frequency</th>
+            <th>Probability</th>
+        </thead>
+        <tbody>
+            
+        </tbody>
+    </table>
+</body>
+
+
+</html>
+
+<script type="text/javascript">
+    $("#wordSearch").keyup(function(e) {
+
+        if($(this).val()) {
+            $("#sentence").html($(this).val());
+            $.ajax({
+                url: '/predict',
+                type: 'POST',
+                data: {
+                    text: $(this).val()
+                }, 
+                success: function(data) {
+                    var tbl = $("#wordTable tbody");
+                    tbl.find("tr").remove();
+                    var freq = data.counts;
+                    i = 1;
+                    totalWords = 0;
+                    for(const [key, value] of Object.entries(freq)) {
+                        totalWords += value;
+                    }
+                    for(const [key, value] of Object.entries(freq)) {
+                        let prob = (value/totalWords) * 100;
+                        let probString = prob.toFixed(2).toString()
+                        tbl.append( 
+                            `
+                                <tr>
+                                    <td>${i}</td>
+                                    <td>${key}</td>
+                                    <td>${value}</td>
+                                    <td>${probString} %</td>
+                                </tr>
+                            `
+                        );
+                        ++i;
+                    }
+                }
+            });
+        }
+
+        else {
+            $("#wordTable tbody tr").remove();
+            $("#sentence").html(" ");
+        }
+
+        e.preventDefault();
+    });
+</script>
