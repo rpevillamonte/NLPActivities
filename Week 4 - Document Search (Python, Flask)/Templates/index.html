@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Document Upload & Search</title>
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+</head>
+
+<body>
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <h3>Upload a pdf file here:</h3>
+        <input type="file" name="pdfUpload">
+        <input type="submit" value="Upload File">
+    </form>
+    <br>
+    <h3>Search for a word here:</h3>
+    <input type="text" name="searchTerm" id="searchTerm">
+    <button type="button" name="searchBtn" id="">Search</button>
+    <h4>Output:</h4>
+    <table id="documentTbl" border="1">
+        <thead>
+            <th>Document</th>
+            <th>Action</th>
+        </thead>
+        <tbody></tbody>
+    </table>
+</body>
+
+</html>
+
+<style>
+    p {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $.ajaxSetup({cache: false});
+        $('#searchTerm').keyup(function() {
+            $('#documentTbl tbody tr').remove();
+            let tbl = $('#documentTbl tbody');
+            $.ajax({
+                url: '/search',
+                type: 'POST',
+                data: {term: $(this).val()},
+                success: function(data) {
+                    let file_names = data.results;
+                    for (i=0; i<file_names.length; i++) {
+                        tbl.append(`
+                        <tr>
+                            <td>
+                                <a href="#">${file_names[i]}</a>
+                            </td>
+                            <td>
+                                <a href="#">Download</a>
+                            </td>
+                        <tr>
+                        `)
+                    }
+                }
+            })
+        });
+
+
+    });
+    
+</script>
+
+
